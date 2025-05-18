@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: research-assistant-backend
+    runtime: java
+    branch: main  # Your GitHub branch name
+    
+    # Build settings
+    buildCommand: ./mvnw clean package
+    startCommand: java -jar target/*.jar
+    
+    # Environment
+    envVars:
+      - key: JAVA_VERSION
+        value: 17
+      - key: GEMINI_API_URL
+        value: /v1beta/models/gemini-pro:generateContent?key=
+      - key: GEMINI_API_KEYS
+        value: your_key_1,your_key_2  # Comma-separated
+    
+    # Resource limits (Free tier)
+    plan: free
+    instanceType: free
+    
+    # Health check
+    healthCheckPath: /actuator/health
