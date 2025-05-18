@@ -1,0 +1,12 @@
+# Backend
+backend/target/
+backend/.idea/
+*.iml
+*.log
+
+# Frontend
+frontend/node_modules/
+
+# Environment
+.env
+application.properties # Exclude if it contains API keys
