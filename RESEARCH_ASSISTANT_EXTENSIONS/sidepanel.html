@@ -1,27 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Research Assistant</title>
-    <link rel="stylesheet" href="sidepanel.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Assistant</title>
+<style>
+    /* Reset & Basics */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f6f8;
+        color: #202124;
+        width: 100%; /* allow responsive width */
+        max-width: 380px; /* for side panel */
+        padding: 12px;
+        overflow-x: hidden;
+        overflow-y: auto; /* scroll if content too big */
+    }
+
+    button { cursor: pointer; border: none; outline: none; }
+
+    /* Container */
+    .container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        padding-right: 0; /* reduce unnecessary right padding */
+    }
+
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #4285f4;
+        margin-bottom: 10px;
+    }
+
+    .header h2 {
+        font-size: 18px;
+        color: #4285f4;
+        font-weight: 700;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .btn-primary {
+        background-color: #4285f4;
+        color: white;
+    }
+
+    .btn-primary:hover { background-color: #3367d6; transform: translateY(-1px); }
+
+    .btn-secondary {
+        background-color: #f1f3f4;
+        color: #5f6368;
+        border: 1px solid #dadce0;
+    }
+
+    .btn-secondary:hover { background-color: #e8eaed; transform: translateY(-1px); }
+
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+    /* Sections */
+    .section {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #dadce0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .section-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #5f6368;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+
+    /* Summary Result */
+    .summary-result {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        max-height: 120px;
+        overflow-y: auto;
+        border: 1px solid #e8eaed;
+        line-height: 1.4;
+    }
+
+    .summary-result b, .summary-result strong {
+        color: #4285f4;
+        font-weight: 600;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-group .btn {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Input & Textarea */
+    .input-field {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #dadce0;
+        font-size: 13px;
+    }
+
+    textarea {
+        width: 100%;
+        min-height: 100px;
+        resize: vertical;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #dadce0;
+        font-family: inherit;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .input-field:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #4285f4;
+        box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
+    }
+
+    /* Status */
+    .status {
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        text-align: center;
+        display: none;
+    }
+
+    .status.success { background: #e6f4ea; color: #0f9d58; border: 1px solid #cce8d5; display: block; }
+    .status.error { background: #fce8e6; color: #db4437; border: 1px solid #f5c6c6; display: block; }
+
+    /* Scrollbar for Summary & Textarea */
+    .summary-result::-webkit-scrollbar,
+    textarea::-webkit-scrollbar { width: 6px; }
+    .summary-result::-webkit-scrollbar-thumb,
+    textarea::-webkit-scrollbar-thumb { background-color: rgba(66,133,244,0.3); border-radius: 3px; }
+    .summary-result::-webkit-scrollbar-track,
+    textarea::-webkit-scrollbar-track { background-color: #f8f9fa; }
+
+    /* Responsive adjustments */
+    @media (max-width: 400px) {
+        body { max-width: 100%; padding: 12px; }
+        .container { padding-right: 0; }
+    }
+</style>
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <div class="header">
             <h2>Research Assistant</h2>
+            <button id="historyBtn" class="btn btn-secondary">History</button>
         </div>
 
-        <div class="actions">
-            <button id="summarizeBtn">Summarize</button>
+        <!-- Summary Section -->
+        <div class="section">
+            <div class="section-title">Summary Results</div>
+            <div id="summaryResult" class="summary-result">Select text and click "Summarize" to get results.</div>
+            <div class="btn-group">
+                <button id="summarizeBtn" class="btn btn-primary">Summarize</button>
+                <button id="appendBtn" class="btn btn-secondary" disabled>Append to Notes</button>
+            </div>
         </div>
 
-        <div class="notes">
-            <h3>Research Notes</h3>
-            <textarea id="notes" placeholder="Take notes here"></textarea>
-            <button id="saveNotesBtn">Save Notes</button>
+        <!-- Notes Section -->
+        <div class="section">
+            <div class="section-title">Research Notes</div>
+            <input type="text" id="noteTitle" class="input-field" placeholder="Research Title">
+            <textarea id="notes" placeholder="Your research notes..."></textarea>
+            <button id="saveBtn" class="btn btn-primary">Save to Database</button>
         </div>
 
-        <div id="results"></div>
+        <!-- Status Message -->
+        <div id="status" class="status"></div>
     </div>
+
     <script src="sidepanel.js"></script>
 </body>
 </html>

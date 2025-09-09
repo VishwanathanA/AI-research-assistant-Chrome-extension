@@ -1,0 +1,25 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IntelliJ / Eclipse / VSCode
+.idea/
+*.iml
+*.ipr
+*.iws
+*.project
+*.classpath
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

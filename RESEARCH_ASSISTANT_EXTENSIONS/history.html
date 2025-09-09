@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research History</title>
+    <link rel="stylesheet" href="history.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Research History</h1>
+            <div class="header-actions">
+                <button id="backBtn" class="icon-btn">← Back</button>
+                <button id="refreshBtn" class="icon-btn">🔄 Refresh</button>
+            </div>
+        </header>
+
+        <div class="search-filters">
+            <div class="search-box">
+                <input type="text" id="searchQuery" placeholder="Search research entries...">
+                <button id="searchBtn" class="primary-btn">Search</button>
+            </div>
+
+            <div class="date-filter">
+                <label for="startDate">From:</label>
+                <input type="date" id="startDate">
+
+                <label for="endDate">To:</label>
+                <input type="date" id="endDate">
+
+                <button id="filterDateBtn" class="secondary-btn">Filter by Date</button>
+            </div>
+        </div>
+
+        <div class="history-content">
+            <div class="table-container">
+                <table id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Preview</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="4" class="loading-message">Loading research history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="detailModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Research Details</h2>
+                <button id="closeModalBtn" class="icon-btn">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="history.js"></script>
+</body>
+
+</html>
