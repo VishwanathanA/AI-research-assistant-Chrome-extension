@@ -2,17 +2,18 @@ package com.research.assistant.Service;
 
 import com.research.assistant.Entity.Research;
 import com.research.assistant.Repository.ResearchRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class ResearchService {
 
-    private final ResearchRepository researchRepository;
+    @Autowired
+    private ResearchRepository researchRepository;
 
     public Research createResearch(Research research) {
         if (research.getDate() == null) {
@@ -26,8 +27,12 @@ public class ResearchService {
     }
 
     public Research getResearchById(Long id) {
-        return researchRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Research not found with id: " + id));
+        Optional<Research> research = researchRepository.findById(id);
+        if (research.isPresent()) {
+            return research.get();
+        } else {
+            throw new RuntimeException("Research not found with id: " + id);
+        }
     }
 
     public Research updateResearch(Long id, Research newResearch) {
@@ -39,10 +44,11 @@ public class ResearchService {
     }
 
     public void deleteResearch(Long id) {
-        if (!researchRepository.existsById(id)) {
+        if (researchRepository.existsById(id)) {
+            researchRepository.deleteById(id);
+        } else {
             throw new RuntimeException("Research not found with id: " + id);
         }
-        researchRepository.deleteById(id);
     }
 
     public List<Research> searchResearch(String query) {
@@ -50,9 +56,6 @@ public class ResearchService {
     }
 
     public List<Research> searchByDateRange(LocalDate start, LocalDate end) {
-        if (start.isAfter(end)) {
-            throw new RuntimeException("Start date cannot be after end date");
-        }
         return researchRepository.findByDateBetween(start, end);
     }
 }

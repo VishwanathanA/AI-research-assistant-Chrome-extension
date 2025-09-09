@@ -10,16 +10,10 @@ import java.util.List;
 
 @Repository
 public interface ResearchRepository extends JpaRepository<Research, Long> {
-
     List<Research> findByTitleContainingIgnoreCase(String title);
-
     List<Research> findByContentContainingIgnoreCase(String content);
-
     List<Research> findByDateBetween(LocalDate start, LocalDate end);
 
-    // Search anywhere (title or content)
-    @Query("SELECT r FROM Research r WHERE " +
-            "LOWER(r.title) LIKE LOWER(CONCAT('%', :word, '%')) OR " +
-            "LOWER(r.content) LIKE LOWER(CONCAT('%', :word, '%'))")
+    @Query("SELECT r FROM Research r WHERE LOWER(r.title) LIKE LOWER(CONCAT('%', :word, '%')) OR LOWER(r.content) LIKE LOWER(CONCAT('%', :word, '%'))")
     List<Research> searchAnywhere(@Param("word") String word);
 }

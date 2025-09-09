@@ -5,30 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f3755eaf-8dc9-4e8f-9d06-e9551e54d786" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/research-assistant/render.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Entity/Research.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Repository/ResearchRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Service/GeminiService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Service/PdfExportService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Service/ResearchService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/WebClientConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/background.js" beforeDir="false" afterPath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/background.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/sidepanel.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/sidepanel.html" beforeDir="false" afterPath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/sidepanel.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/content.js" beforeDir="false" afterPath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/content.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/history.js" beforeDir="false" afterPath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/history.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/sidepanel.js" beforeDir="false" afterPath="$PROJECT_DIR$/../RESEARCH_ASSISTANT_EXTENSIONS/sidepanel.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/research-assistant.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/research-assistant/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/GeminiResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/GeminiResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/ResearchAssistantApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/ResearchAssistantApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/ResearchController.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Controller/ResearchController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Controller/ResearchController.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Controller/ResearchController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Entity/Research.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Entity/Research.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Repository/ResearchRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Repository/ResearchRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/ResearchRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/ResearchRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/ResearchService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Service/GeminiService.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Service/GeminiService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Service/PdfExportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Service/PdfExportService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Service/ResearchService.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/Service/ResearchService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/WebClientConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/research-assistant/src/main/java/com/research/assistant/WebClientConfig.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

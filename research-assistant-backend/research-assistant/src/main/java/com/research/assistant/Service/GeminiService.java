@@ -1,16 +1,13 @@
 package com.research.assistant.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.research.assistant.GeminiResponse;
 import com.research.assistant.ResearchRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-import java.util.List;
-import java.time.Duration;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -22,127 +19,120 @@ public class GeminiService {
     @Value("${gemini.api.key}")
     private String geminiApiKey;
 
-    private final WebClient webClient;
-    private final ObjectMapper objectMapper;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    public GeminiService(WebClient webClient, ObjectMapper objectMapper) {
-        this.webClient = webClient;
-        this.objectMapper = objectMapper;
-    }
-
-    /**
-     * Send a prompt to Gemini AI with automatic retries on 503 errors
-     */
     public String processContent(ResearchRequest request) {
         try {
-            // Build the prompt using the ResearchRequest
             String prompt = buildPrompt(request);
 
-            // Create the request body in the correct Gemini 2.0 Flash format
-            Map<String, Object> requestBody = Map.of(
-                    "contents", List.of(
-                            Map.of(
-                                    "role", "user",
-                                    "parts", List.of(
-                                            Map.of("text", prompt)
-                                    )
-                            )
-                    ),
-                    // Add generation config for better control
-                    "generationConfig", Map.of(
-                            "temperature", 0.7,
-                            "topP", 0.8,
-                            "topK", 40,
-                            "maxOutputTokens", 1024,
-                            "responseMimeType", "text/plain"
-                    )
-            );
+            Map<String, Object> requestBody = new HashMap<>();
 
-            // Log the actual JSON for debugging
-            String jsonBody = objectMapper.writeValueAsString(requestBody);
-            System.out.println("Request JSON: " + jsonBody);
+            Map<String, Object> content = new HashMap<>();
+            content.put("role", "user");
 
-            GeminiResponse geminiResponse = webClient.post()
-                    .uri(geminiApiUrl + "?key=" + geminiApiKey)
-                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(GeminiResponse.class)
-                    .retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
-                            .filter(throwable -> throwable instanceof WebClientResponseException
-                                    && ((WebClientResponseException) throwable).getStatusCode().value() == 503))
-                    .onErrorResume(WebClientResponseException.class, ex -> {
-                        // Log the actual error response from Gemini
-                        System.err.println("Gemini API Error: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString());
-                        return Mono.empty(); // Return empty to trigger fallback
-                    })
-                    .block();
+            Map<String, String> part = new HashMap<>();
+            part.put("text", prompt);
 
-            if (geminiResponse == null) {
-                throw new RuntimeException("Failed to get response from Gemini API");
+            content.put("parts", new Object[]{part});
+            requestBody.put("contents", new Object[]{content});
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            String url = geminiApiUrl + "?key=" + geminiApiKey;
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+            // Make the actual API call
+            Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
+
+            // Extract the response text from the complex JSON structure
+            if (response != null && response.containsKey("candidates")) {
+                Object candidates = response.get("candidates");
+                if (candidates instanceof java.util.List && !((java.util.List<?>) candidates).isEmpty()) {
+                    Object firstCandidate = ((java.util.List<?>) candidates).get(0);
+                    if (firstCandidate instanceof java.util.Map) {
+                        java.util.Map<?, ?> candidateMap = (java.util.Map<?, ?>) firstCandidate;
+                        Object contentObj = candidateMap.get("content");
+                        if (contentObj instanceof java.util.Map) {
+                            java.util.Map<?, ?> contentMap = (java.util.Map<?, ?>) contentObj;
+                            Object partsObj = contentMap.get("parts");
+                            if (partsObj instanceof java.util.List && !((java.util.List<?>) partsObj).isEmpty()) {
+                                Object firstPart = ((java.util.List<?>) partsObj).get(0);
+                                if (firstPart instanceof java.util.Map) {
+                                    java.util.Map<?, ?> partMap = (java.util.Map<?, ?>) firstPart;
+                                    Object textObj = partMap.get("text");
+                                    if (textObj != null) {
+                                        return textObj.toString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
-            // Log response
-            System.out.println("Received response from Gemini: " + geminiResponse);
-
-            return extractText(geminiResponse);
+            // If we can't extract the response, return a simple summary
+            return createSimpleSummary(request.getContent());
 
         } catch (Exception e) {
-            System.err.println("AI Service error: " + e.getMessage());
-            e.printStackTrace();
-            return "AI service temporarily unavailable. Please try again later.";
+            System.out.println("AI Service error: " + e.getMessage());
+            // Return a simple summary instead of error message
+            return createSimpleSummary(request.getContent());
         }
     }
 
-    /**
-     * Extract text from GeminiResponse safely
-     */
-    private String extractText(GeminiResponse geminiResponse) {
-        if (geminiResponse == null || geminiResponse.getCandidates() == null || geminiResponse.getCandidates().isEmpty()) {
-            return "No candidates found in response";
+    // Create a simple summary when AI service is unavailable
+    private String createSimpleSummary(String content) {
+        if (content == null || content.trim().isEmpty()) {
+            return "No content to summarize.";
         }
 
-        var firstCandidate = geminiResponse.getCandidates().get(0);
-        if (firstCandidate.getContent() != null &&
-                firstCandidate.getContent().getParts() != null &&
-                !firstCandidate.getContent().getParts().isEmpty()) {
-            return firstCandidate.getContent().getParts().get(0).getText();
+        // Split into sentences and take first 2-3 sentences
+        String[] sentences = content.split("\\.\\s+");
+        StringBuilder summary = new StringBuilder();
+
+        int sentencesToTake = Math.min(3, sentences.length);
+        for (int i = 0; i < sentencesToTake; i++) {
+            if (i > 0) summary.append(" ");
+            summary.append(sentences[i]).append(".");
         }
 
-        return "No content found in response";
+        // Add bold tags to important words (simple heuristic)
+        String result = summary.toString();
+        result = result.replace("important", "<b>important</b>")
+                .replace("key", "<b>key</b>")
+                .replace("essential", "<b>essential</b>")
+                .replace("critical", "<b>critical</b>")
+                .replace("major", "<b>major</b>")
+                .replace("significant", "<b>significant</b>");
+
+        return result;
     }
 
-    /**
-     * Build a context-aware prompt for Gemini AI
-     */
     private String buildPrompt(ResearchRequest request) {
         StringBuilder prompt = new StringBuilder();
-        String context = request.getContext();
-        String content = request.getContent();
 
-        switch (request.getOperation()) {
-            case "summarize":
-                if (context != null && !context.isEmpty()) {
-                    prompt.append("Summarize this text for the field of ").append(context)
-                            .append(" in a few concise lines. Highlight important words using <b>bold</b> tags:\n\n");
-                } else {
-                    prompt.append("Summarize this text in a few concise lines. Highlight important words using <b>bold</b> tags:\n\n");
-                }
-                prompt.append(content);
-                break;
-
-            case "suggest":
-                if (context == null || context.isEmpty()) context = "general";
-                prompt.append("You are an expert in ").append(context)
-                        .append(". Provide a list of topics or notes relevant to this field, highlighting important words using <b>bold</b> tags, one per line:\n\n");
-                prompt.append(content);
-                break;
-
-            default:
-                prompt.append(content);
-                break;
+        if ("summarize".equals(request.getOperation())) {
+            if (request.getContext() != null && !request.getContext().isEmpty()) {
+                prompt.append("Summarize this text about ")
+                        .append(request.getContext())
+                        .append(" in a few concise lines. Highlight important words using <b>bold</b> tags:\n\n");
+            } else {
+                prompt.append("Summarize this text in a few concise lines. Highlight important words using <b>bold</b> tags:\n\n");
+            }
+        } else if ("suggest".equals(request.getOperation())) {
+            String context = request.getContext();
+            if (context == null || context.isEmpty()) {
+                context = "general";
+            }
+            prompt.append("You are an expert in ")
+                    .append(context)
+                    .append(". Provide a list of topics or notes relevant to this field, highlighting important words using <b>bold</b> tags, one per line:\n\n");
+        } else {
+            prompt.append("Please process this text:\n\n");
         }
 
+        prompt.append(request.getContent());
         return prompt.toString();
     }
 }

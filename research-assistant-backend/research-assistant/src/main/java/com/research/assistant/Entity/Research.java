@@ -2,18 +2,22 @@ package com.research.assistant.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDate;
 
-@Entity
 @Data
+@Entity
+@Table(name = "research")
 public class Research {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;          // Title of research note
+    private String title;
+
     @Column(columnDefinition = "TEXT")
-    private String content;        // Full content / summarized text
-    private LocalDate date;        // Creation or update date
+    private String content;
+
+    private LocalDate date;
 }

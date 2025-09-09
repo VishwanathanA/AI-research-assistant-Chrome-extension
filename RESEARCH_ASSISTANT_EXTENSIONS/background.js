@@ -1,19 +1,23 @@
 console.log("Research Assistant background script loaded");
 
-// Open side panel when extension icon is clicked
+// Set up side panel to open when extension icon is clicked
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true })
-    .catch(error => console.error("Side panel setup error:", error));
+    .catch(function(error) {
+        console.error("Side panel setup error:", error);
+    });
 
-// Fallback: open side panel on action click
-chrome.action.onClicked.addListener((tab) => {
-    if (tab?.windowId !== undefined) {
+// Fallback: open side panel when extension icon is clicked
+chrome.action.onClicked.addListener(function(tab) {
+    if (tab && tab.windowId !== undefined) {
         chrome.sidePanel.open({ windowId: tab.windowId })
-            .catch(error => console.error("Error opening side panel:", error));
+            .catch(function(error) {
+                console.error("Error opening side panel:", error);
+            });
     }
 });
 
-// Create context menu for text selection
-chrome.runtime.onInstalled.addListener(() => {
+// Create right-click menu option
+chrome.runtime.onInstalled.addListener(function() {
     chrome.contextMenus.create({
         id: "researchAssistant",
         title: "Research with Assistant",
@@ -21,15 +25,21 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 });
 
-// Handle context menu click
-chrome.contextMenus.onClicked.addListener((info, tab) => {
-    if (!tab?.windowId) return;
+// Handle right-click menu selection
+chrome.contextMenus.onClicked.addListener(function(info, tab) {
+    if (!tab || !tab.windowId) return;
+    
     if (info.menuItemId === "researchAssistant" && info.selectionText) {
+        // Save selected text to storage
         chrome.storage.local.set({ 
             currentSelection: info.selectionText,
             selectionTimestamp: Date.now()
         });
+        
+        // Open side panel
         chrome.sidePanel.open({ windowId: tab.windowId })
-            .catch(error => console.error("Error opening side panel:", error));
+            .catch(function(error) {
+                console.error("Error opening side panel:", error);
+            });
     }
 });

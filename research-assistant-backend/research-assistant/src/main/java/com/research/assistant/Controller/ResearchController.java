@@ -5,23 +5,26 @@ import com.research.assistant.ResearchRequest;
 import com.research.assistant.Service.PdfExportService;
 import com.research.assistant.Service.ResearchService;
 import com.research.assistant.Service.GeminiService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/research")
-@CrossOrigin(origins = "*") // Simple CORS solution
-@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class ResearchController {
 
-    private final ResearchService researchService;
-    private final PdfExportService pdfExportService;
-    private final GeminiService geminiService;
+    @Autowired
+    private ResearchService researchService;
+
+    @Autowired
+    private PdfExportService pdfExportService;
+
+    @Autowired
+    private GeminiService geminiService;
 
     // AI Processing
     @PostMapping("/process")
@@ -65,14 +68,10 @@ public class ResearchController {
     @GetMapping("/search/date")
     public List<Research> searchByDateRange(@RequestParam LocalDate startDate,
                                             @RequestParam LocalDate endDate) {
-        if (startDate.isAfter(endDate)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Start date cannot be after end date");
-        }
         return researchService.searchByDateRange(startDate, endDate);
     }
 
-
-    // PDF Export
+    // PDF Export - Single PDF only
     @GetMapping("/{id}/pdf")
     public ResponseEntity<byte[]> exportResearchPdf(@PathVariable Long id) {
         try {

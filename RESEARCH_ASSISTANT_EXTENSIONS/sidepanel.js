@@ -2,11 +2,13 @@ const API_BASE = "http://localhost:8080/api/research";
 let currentSummary = "";
 let selectedText = "";
 
+// Wait for page to load
 document.addEventListener('DOMContentLoaded', function() {
     loadSavedNotes();
     setupEventListeners();
 });
 
+// Set up all button click events
 function setupEventListeners() {
     document.getElementById('summarizeBtn').addEventListener('click', summarizeText);
     document.getElementById('appendBtn').addEventListener('click', appendToNotes);
@@ -14,30 +16,32 @@ function setupEventListeners() {
     document.getElementById('historyBtn').addEventListener('click', openHistory);
 }
 
+// Get selected text and send to backend for summarization
 async function summarizeText() {
     try {
-        // Get the active tab
-        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        // Get the current browser tab
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        const currentTab = tabs[0];
         
-        // Check if we have permission to access this page
-        if (tab.url.startsWith('chrome://') || tab.url.startsWith('edge://')) {
+        // Check if we can access this page
+        if (currentTab.url.startsWith('chrome://') || currentTab.url.startsWith('edge://')) {
             showStatus('Cannot access browser pages. Please try on a regular website.', 'error');
             return;
         }
 
-        // Execute script to get selected text directly from the page
-        let result;
+        // Get selected text from the page
         try {
-            [{ result }] = await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                function: () => window.getSelection().toString().trim()
+            const results = await chrome.scripting.executeScript({
+                target: { tabId: currentTab.id },
+                function: getSelectedText
             });
-            selectedText = result || "";
+            selectedText = results[0].result || "";
         } catch (error) {
             showStatus('Cannot access this page. Please try on a different website.', 'error');
             return;
         }
 
+        // Check if text was selected
         if (!selectedText) {
             showStatus('Please select some text on the page first!', 'error');
             return;
@@ -45,34 +49,36 @@ async function summarizeText() {
 
         showStatus('Summarizing...', 'success');
 
-        // Send to backend for processing - matches ResearchRequest structure
-        const requestBody = {
+        // Prepare data to send to backend
+        const requestData = {
             content: selectedText,
             operation: 'summarize',
             context: 'research',
             saveToDatabase: false
         };
 
-        const response = await fetch(`${API_BASE}/process`, {
+        // Send request to backend
+        const response = await fetch(API_BASE + '/process', {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(requestData)
         });
 
+        // Check if request was successful
         if (!response.ok) {
-            throw new Error(`Server error: ${response.status}`);
+            throw new Error('Server error: ' + response.status);
         }
         
-        const data = await response.text();
-        currentSummary = data;
+        // Get the summary from response
+        const summary = await response.text();
+        currentSummary = summary;
         
-        // Display with bold tags rendered properly
-        document.getElementById('summaryResult').innerHTML = data.replace(/\n/g, '<br>');
+        // Display the summary
+        document.getElementById('summaryResult').innerHTML = summary.replace(/\n/g, '<br>');
         
-        // Enable append button
+        // Enable the append button
         document.getElementById('appendBtn').disabled = false;
         
         showStatus('Summary complete!', 'success');
@@ -81,7 +87,7 @@ async function summarizeText() {
         console.error('Error:', error);
         showStatus('Error: ' + error.message, 'error');
         
-        // Fallback
+        // Fallback: show first few words of selected text
         if (selectedText) {
             currentSummary = selectedText.split(' ').slice(0, 30).join(' ') + '...';
             document.getElementById('summaryResult').textContent = currentSummary;
@@ -90,6 +96,12 @@ async function summarizeText() {
     }
 }
 
+// Function to get selected text (runs on the webpage)
+function getSelectedText() {
+    return window.getSelection().toString().trim();
+}
+
+// Add summary to notes
 function appendToNotes() {
     if (!currentSummary) {
         showStatus('No summary to append!', 'error');
@@ -97,22 +109,23 @@ function appendToNotes() {
     }
 
     try {
-        const notesArea = document.getElementById('notes');
+        const notesTextarea = document.getElementById('notes');
         
-        // Convert HTML to plain text for notes
-        const plainTextSummary = currentSummary
+        // Convert HTML to plain text
+        const plainText = currentSummary
             .replace(/<br\s*\/?>/gi, '\n')
             .replace(/<b>/gi, '')
             .replace(/<\/b>/gi, '')
             .replace(/&nbsp;/gi, ' ')
             .replace(/<[^>]*>/g, '');
 
-        const separator = notesArea.value ? '\n' : '';
-        notesArea.value += separator + plainTextSummary + '\n';
+        // Add separator if notes already exist
+        const separator = notesTextarea.value ? '\n\n' : '';
+        notesTextarea.value += separator + plainText + '\n';
         
         // Scroll to bottom and focus
-        notesArea.focus();
-        notesArea.scrollTop = notesArea.scrollHeight;
+        notesTextarea.focus();
+        notesTextarea.scrollTop = notesTextarea.scrollHeight;
         
         showStatus('Summary appended to notes!', 'success');
         
@@ -122,10 +135,15 @@ function appendToNotes() {
     }
 }
 
+// Save notes to database
 async function saveNotes() {
-    const title = document.getElementById('noteTitle').value.trim();
-    const content = document.getElementById('notes').value.trim();
+    const titleInput = document.getElementById('noteTitle');
+    const notesTextarea = document.getElementById('notes');
     
+    const title = titleInput.value.trim();
+    const content = notesTextarea.value.trim();
+    
+    // Validate inputs
     if (!title) {
         showStatus('Please add a title for your research!', 'error');
         return;
@@ -137,41 +155,41 @@ async function saveNotes() {
     }
 
     try {
-        // CORRECTED: Match backend Research entity structure exactly
+        // Prepare data for saving
         const researchData = {
             title: title,
             content: content
-            // Don't include selectedText, sourceUrl, or date fields
-            // Backend will handle date automatically
         };
 
+        // Send save request
         const response = await fetch(API_BASE, {
             method: 'POST',
             headers: { 
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(researchData)
         });
 
+        // Check if save was successful
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`Save failed: ${response.status} - ${errorText}`);
+            throw new Error('Save failed: ' + errorText);
         }
         
-        const savedResearch = await response.json();
-        console.log('Saved successfully:', savedResearch);
+        // Save was successful
+        const savedData = await response.json();
+        console.log('Saved successfully:', savedData);
         
-        // Save notes to local storage as well
+        // Also save to browser storage
         chrome.storage.local.set({ researchNotes: content });
         
         showStatus('Notes saved to database successfully!', 'success');
         
-        // Clear form
-        document.getElementById('noteTitle').value = '';
-        document.getElementById('notes').value = '';
+        // Clear the form
+        titleInput.value = '';
+        notesTextarea.value = '';
         
-        // Reset states
+        // Reset summary section
         currentSummary = "";
         selectedText = "";
         document.getElementById('summaryResult').textContent = 'Select text and click summarize to get results';
@@ -183,6 +201,7 @@ async function saveNotes() {
     }
 }
 
+// Load saved notes from browser storage
 function loadSavedNotes() {
     chrome.storage.local.get(['researchNotes'], function(result) {
         if (result.researchNotes) {
@@ -191,17 +210,19 @@ function loadSavedNotes() {
     });
 }
 
+// Open history page
 function openHistory() {
-    // Open the history page
     chrome.tabs.create({ url: 'history.html' });
 }
 
+// Show status message
 function showStatus(message, type) {
     const statusDiv = document.getElementById('status');
     statusDiv.textContent = message;
     statusDiv.className = 'status ' + type;
     
-    setTimeout(() => {
+    // Hide status after 3 seconds
+    setTimeout(function() {
         statusDiv.className = 'status';
     }, 3000);
 }
