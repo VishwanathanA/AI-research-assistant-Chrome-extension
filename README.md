@@ -18,3 +18,4 @@ cd backend && mvn spring-boot:run
 
 # Extension
 Load unpacked from /frontend in chrome://extensions
+"# AI-Reseach-Assistant" 
